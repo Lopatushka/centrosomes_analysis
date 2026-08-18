@@ -1,13 +1,11 @@
 from ij import IJ, WindowManager
-from ij.gui import GenericDialog
 from ij.plugin.frame import RoiManager
 from ij.gui import ShapeRoi
-from ij.plugin import ChannelSplitter
+from ij.plugin import ChannelSplitter, ZProjector
 from ij.measure import Measurements, ResultsTable
 from ij.process import ImageStatistics
 from ij.gui import NonBlockingGenericDialog
 from ij.gui import WaitForUserDialog
-from ij.plugin.filter import Analyzer
 import os
 import csv
 import traceback
@@ -53,6 +51,38 @@ def ask_params_for_image(n_slices):
         "stop_analysis": stop_analysis
     }
     
+
+def max_projection(imp, first_slice, last_slice):
+    """
+    Create a maximum intensity projection between
+    first_slice and last_slice.
+
+    Parameters
+    ----------
+    imp : ImagePlus
+        Input image stack.
+    first_slice : int
+        First slice to include.
+    last_slice : int
+        Last slice to include.
+
+    Returns
+    -------
+    ImagePlus
+        Maximum intensity projection.
+    """
+
+    zp = ZProjector(imp)
+
+    zp.setStartSlice(first_slice)
+    zp.setStopSlice(last_slice)
+    zp.setMethod(ZProjector.MAX_METHOD)
+
+    zp.doProjection()
+
+    projection = zp.getProjection()
+
+    return projection
     
 def clear_results_and_rois():
     IJ.run("Clear Results")
@@ -108,6 +138,16 @@ def img_analysis(imp):
     
     first_slice = params["first_slice"] if params is not None else 1
     last_slice = params["last_slice"] if params is not None else n_slices
+    
+    # Make maximum intensity projection
+    proj1 = max_projection(c1, first_slice, last_slice)
+    proj2 = max_projection(c2, first_slice, last_slice)
+    proj3 = max_projection(c3, first_slice, last_slice)
+    
+    # Show splitted images
+    proj1.show()
+    proj2.show()
+    proj3.show()
     
     return True
     
