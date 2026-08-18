@@ -138,6 +138,10 @@ def img_analysis(imp):
     proj1 = max_projection(c1, first_slice, last_slice) # DAPI BLUE
     proj2 = max_projection(c2, first_slice, last_slice) # MEASUREMENT 1 GREEN
     proj3 = max_projection(c3, first_slice, last_slice) # MEASUREMENT 2 RED
+    
+    # Adjust brigthtness and contrast
+    IJ.run(proj2, "Enhance Contrast", "saturated=0.05 normalize")
+    IJ.run(proj3, "Enhance Contrast", "saturated=0.05 normalize")
        
     # Merge channels: RED GREEN BLUE
     merge1 = RGBStackMerge.mergeChannels([None, proj2, proj1, None, None, None, None], True)
@@ -162,11 +166,7 @@ def img_analysis(imp):
     close_image(proj1)
     close_image(proj2)
     close_image(proj3)
-    
-    # Adjust brigthtness and contrast
-    IJ.run(merge1, "Enhance Contrast", "saturated=0.35 normalize")
-    IJ.run(merge2, "Enhance Contrast", "saturated=0.35 normalize")
-    
+       
     return True
     
 
