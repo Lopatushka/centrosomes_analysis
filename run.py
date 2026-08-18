@@ -223,7 +223,7 @@ def img_analysis(imp, output_dir):
                      
         IJ.log("Measurement cell number: {}".format(n_cell))
         
-        for i in range(1):
+        for i in range(1, 3):
             # Clear ROI manager
             rm.reset()
              
@@ -249,7 +249,7 @@ def img_analysis(imp, output_dir):
                 rt.incrementCounter()
                 rt.addValue("Image", imp_name)
                 rt.addValue("Cell", n_cell)
-                rt.addValue("Channel", measurement_type)
+                rt.addValue("Channel number", i)
                 rt.addValue("ROI", roi_name)
             
             # Show/update table
