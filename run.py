@@ -31,19 +31,20 @@ def ask_params_for_image():
         return None
     
     # Read values in the same order they were added
-    first_slice = int(gd.getNextNumber())
-    last_slice = int(gd.getNextNumber())
+    params = {}
+    params["first_slice"] = int(gd.getNextNumber())
+    params["last_slice"] = int(gd.getNextNumber())
     
     # Validate input
-    if first_slice < 1:
+    if params["first_slice"] < 1:
         print("First slice must be >= 1.")
         return None
 
-    if last_slice < first_slice:
+    if params["last_slice"] < params["first_slice"]:
         print("Last slice must be >= first slice.")
         return None
 
-    return first_slice, last_slice
+    return params
     
     
 def clear_results_and_rois():
