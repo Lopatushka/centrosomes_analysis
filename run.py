@@ -197,7 +197,6 @@ def img_analysis(imp, output_dir):
     
     # Create an empty results table and show it
     rt = ResultsTable()
-    rt.show("Results")
     
     # --- Iteration ---        
     n_cell = 0
@@ -232,8 +231,6 @@ def img_analysis(imp, output_dir):
         
         count = 0
         
-        #img = merge1 if measurement_type == "Channel 1" else merge2
-        
         while count < 1:
             # Clear ROI manager
             rm.reset()
@@ -263,7 +260,17 @@ def img_analysis(imp, output_dir):
                 rt.addValue("Channel", measurement_type)
                 rt.addValue("ROI", roi_name)
             
+            # Show/update table
+            rt.show("Results")
+            
             count += 1
+    
+    IJ.log("Image is processed. Results are saved.")
+    
+    # Save results table as csv file
+    results_name = "results_{}.csv".format(imp_name)
+    results_path = os.path.join(output_dir, results_name)
+    rt.save(results_path)
     
     # Close images after analysis   
     close_image(merge1)
@@ -301,8 +308,6 @@ def main():
                 if imp is None:
                     IJ.showMessage("Failed to open image:", filename)
                     continue
-                
-                #imp.show()
                 
                 IJ.log("Processing image pair {}: {}".format(n_files, root))
                 
