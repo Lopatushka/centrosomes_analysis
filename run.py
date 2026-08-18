@@ -15,13 +15,16 @@ import traceback
 # ---------------------------------
 # HELPERS
 # ---------------------------------
-def ask_params_for_image():
+def ask_params_for_image(n_slices):
     gd = GenericDialog("Maximum Intensity Projection Parameters")
-    gd.addMessage("Choose the slice range.")
+    gd.addMessage(
+        "Choose the slice range.\n"
+        "This image contains %d slices." % n_slices
+    )
     
     # Fields
     gd.addNumericField("First slice:", 1, 0)
-    gd.addNumericField("Last slice:", 10, 0)
+    gd.addNumericField("Last slice:", n_slices, 0)
     
     # Show dialog
     gd.showDialog()
@@ -31,20 +34,21 @@ def ask_params_for_image():
         return None
     
     # Read values in the same order they were added
-    params = {}
-    params["first_slice"] = int(gd.getNextNumber())
-    params["last_slice"] = int(gd.getNextNumber())
+    first_slice = int(gd.getNextNumber())
+    last_slice = int(gd.getNextNumber())
     
-    # Validate input
-    if params["first_slice"] < 1:
-        print("First slice must be >= 1.")
+    # Keep values within valid range
+    first_slice = max(1, first_slice)
+    last_slice = min(n_slices, last_slice)
+    
+    if first_slice > last_slice:
+        print("Invalid slice range.")
         return None
 
-    if params["last_slice"] < params["first_slice"]:
-        print("Last slice must be >= first slice.")
-        return None
-
-    return params
+    return {
+        "first_slice": first_slice,
+        "last_slice": last_slice
+    }
     
     
 def clear_results_and_rois():
@@ -54,8 +58,9 @@ def close_image(imp):
     if imp is not None:
         imp.close()
            
-def img_analysis(imp):
+def img_analysis(imp):   
     imp_name = imp.getTitle().split(".")[0] # get image name without extension
+    n_slices = imp.getNSlices()
     
     # Split channels
     channels = ChannelSplitter.split(imp)
@@ -71,6 +76,13 @@ def img_analysis(imp):
     c1.setTitle("DAPI_{}".format(imp_name))
     c2.setTitle("MEAS1_{}".format(imp_name))
     c3.setTitle("MEAS2_{}".format(imp_name))
+    
+    # Ask user about the parameters: first and last slice for the maximum intensity projection
+    params = ask_params_for_image()
+    first_slice = params["first_slice"] if params is not None else 1
+    last_slice = params["last_slice"] if params is not None else n_slices
+    if last_slice > n_slices:
+        last_slice = n_slices
 
 # ---------------------------------
 # MAIN FUNCTION
@@ -99,6 +111,7 @@ def main():
                 imp.show()
                 
                 IJ.log("Processing image pair {}: {}".format(n_files, root))
+                
                 img_analysis(imp)
                 
                 # Cleanup
