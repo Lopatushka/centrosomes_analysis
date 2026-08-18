@@ -223,15 +223,15 @@ def img_analysis(imp, output_dir):
                      
         IJ.log("Measurement cell number: {}".format(n_cell))
         
-        for i in range(1, 3):
+        for channel in range(1, 3):
             # Clear ROI manager
             rm.reset()
              
             # Measure image 
             WaitForUserDialog(
-                "Cell %s - merge image %s" % (n_cell, i),
-                "Select objects for Cell %s in %s.\n"
-                "Click OK when finished." % (n_cell, i)
+                "Cell %s - merge image %s" % (n_cell, channel),
+                "Select objects for Cell number %s in Channel %s.\n"
+                "Click OK when finished." % (n_cell, channel)
             ).show()
             
             # Re-fetch after user interaction in while loop
@@ -249,7 +249,7 @@ def img_analysis(imp, output_dir):
                 rt.incrementCounter()
                 rt.addValue("Image", imp_name)
                 rt.addValue("Cell", n_cell)
-                rt.addValue("Channel number", i)
+                rt.addValue("Channel number", channel)
                 rt.addValue("ROI", roi_name)
             
             # Show/update table
