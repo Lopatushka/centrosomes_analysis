@@ -183,7 +183,7 @@ def img_analysis(imp, output_dir):
     close_image(proj3)
     
     # ---------------------------------
-    # Measurements
+    # Measurements of 1 image, several cells
     # ---------------------------------   
     clear_results_and_rois()
     
@@ -199,47 +199,39 @@ def img_analysis(imp, output_dir):
     rt = ResultsTable()
     
     # --- Iteration ---        
-    n_cell = 0
+    n_cell = 1
     
     while True:
         # Clear ROI manager
         rm.reset()
-        
-        if n_cell > 0:
-            IJ.log("Moving to the next cell in the image.")
-        
+                
         # Dialog with user
         gd = GenericDialog("Measurement")
         gd.addChoice(
                     "Measure single cell:",
-                    ["Merge 1", "Merge2 ", "Next image"],
-                    "Channel 1"
+                    ["Measure", "Next image"],
+                    "Measure"
         )
         gd.showDialog()
         
-        if gd.wasCanceled():
-            measurement_type = "Next image"
-        else:
-            measurement_type = gd.getNextChoice()
-            
+        measurement_type = gd.getNextChoice()
+                    
         # Skip pair and go to next folder
-        if measurement_type == "Next image":
+        if measurement_type == "Next image" or gd.wasCanceled():
             IJ.log("Moving to the next image.")
             break
-                
-        n_cell += 1
+                     
+        IJ.log("Measurement cell number: {}".format(n_cell))
         
-        count = 0
-        
-        while count < 1:
+        for i in range(1):
             # Clear ROI manager
             rm.reset()
              
             # Measure image 
             WaitForUserDialog(
-                "Cell %s - %s" % (n_cell, measurement_type),
+                "Cell %s - merge image %s" % (n_cell, i),
                 "Select objects for Cell %s in %s.\n"
-                "Click OK when finished." % (n_cell, measurement_type)
+                "Click OK when finished." % (n_cell, i)
             ).show()
             
             # Re-fetch after user interaction in while loop
@@ -267,14 +259,14 @@ def img_analysis(imp, output_dir):
             IJ.run(merge1, "Select None", "")
             IJ.run(merge2, "Select None", "")
             
-            count += 1
-    
-    IJ.log("Image is processed. Results are saved.")
+        n_cell += 1
     
     # Save results table as csv file
     results_name = "results_{}.csv".format(imp_name)
     results_path = os.path.join(output_dir, results_name)
     rt.save(results_path)
+    
+    IJ.log("Image is processed. Results are saved.")
     
     # Close images after analysis   
     close_image(merge1)
