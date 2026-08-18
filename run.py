@@ -60,6 +60,22 @@ def clear_results_and_rois():
 def close_image(imp):
     if imp is not None:
         imp.close()
+        
+def close_all_images():
+    """
+    Close all currently open images without saving.
+    """
+    image_ids = WindowManager.getIDList()
+
+    if image_ids is None:
+        return
+
+    for image_id in image_ids:
+        imp = WindowManager.getImage(image_id)
+
+        if imp is not None:
+            imp.changes = False  # prevent "Save changes?" dialog
+            imp.close()
            
 def img_analysis(imp):   
     imp_name = imp.getTitle().split(".")[0] # get image name without extension
@@ -88,7 +104,6 @@ def img_analysis(imp):
     # Ask user about the parameters: first and last slice for the maximum intensity projection
     params = ask_params_for_image(n_slices)
     if params["stop_analysis"]:
-        IJ.log("Analysis stopped by user.")
         return False
     
     first_slice = params["first_slice"] if params is not None else 1
@@ -96,8 +111,6 @@ def img_analysis(imp):
     
     return True
     
-
-
 
 # ---------------------------------
 # MAIN FUNCTION
@@ -136,6 +149,7 @@ def main():
                 clear_results_and_rois()
                 close_image(imp)
     
+    close_all_images()
     IJ.log("Finished processing {} files.".format(n_files))
 
 
