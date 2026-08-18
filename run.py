@@ -1,9 +1,9 @@
 from ij import IJ, WindowManager
 from ij.plugin.frame import RoiManager
 from ij.gui import ShapeRoi
-from ij.plugin import ChannelSplitter, ZProjector
+from ij.plugin import ChannelSplitter, ZProjector, RGBStackMerge
 from ij.measure import Measurements, ResultsTable
-from ij.process import ImageStatistics
+from ij.process import ImageStatistics, ImageConverter
 from ij.gui import NonBlockingGenericDialog
 from ij.gui import WaitForUserDialog
 import os
@@ -122,9 +122,9 @@ def img_analysis(imp):
     c3 = channels[2] # MEARGUREMENT 2
     
     # --- Changes names of splitted images ---
-    c1.setTitle("DAPI_{}".format(imp_name))
-    c2.setTitle("MEAS1_{}".format(imp_name))
-    c3.setTitle("MEAS2_{}".format(imp_name))
+    #c1.setTitle("DAPI_{}".format(imp_name))
+    #c2.setTitle("MEAS1_{}".format(imp_name))
+    #c3.setTitle("MEAS2_{}".format(imp_name))
     
     # Show splitted images
     c1.show()
@@ -140,14 +140,33 @@ def img_analysis(imp):
     last_slice = params["last_slice"] if params is not None else n_slices
     
     # Make maximum intensity projection
-    proj1 = max_projection(c1, first_slice, last_slice)
-    proj2 = max_projection(c2, first_slice, last_slice)
-    proj3 = max_projection(c3, first_slice, last_slice)
+    proj1 = max_projection(c1, first_slice, last_slice) # DAPI BLUE
+    proj2 = max_projection(c2, first_slice, last_slice) # MEASUREMENT 1 GREEN
+    proj3 = max_projection(c3, first_slice, last_slice) # MEASUREMENT 2 RED
+    
+    # Show images
+    #proj1.show()
+    #proj2.show()
+    #proj3.show()
+    
+    # Merge channels: RED GREEN BLUE
+    merge1 = RGBStackMerge.mergeChannels([None, proj2, proj1, None, None, None, None], True)
+    ImageConverter(merge1).convertToRGB()
+    merge1.setTitle("merge1_{}".format(imp_name))
+    
+    merge2 = RGBStackMerge.mergeChannels([proj3, None, proj1, None, None, None, None], True)
+    ImageConverter(merge2).convertToRGB()
+    merge2.setTitle("merge2_{}".format(imp_name))
     
     # Show splitted images
-    proj1.show()
-    proj2.show()
-    proj3.show()
+    merge1.show()
+    merge2.show()
+    
+    # Close images
+    close_image(imp)
+    close_image(c1)
+    close_image(c2)
+    close_image(c3)
     
     return True
     
@@ -189,7 +208,7 @@ def main():
                 clear_results_and_rois()
                 close_image(imp)
     
-    close_all_images()
+    #close_all_images()
     IJ.log("Finished processing {} files.".format(n_files))
 
 
