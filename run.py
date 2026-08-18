@@ -201,10 +201,14 @@ def img_analysis(imp, output_dir):
     n_cell = 0
     
     while True:
+        # Clear ROI manager
+        rm.reset()
+        
+        # Dialog with user
         gd = GenericDialog("Measurement")
         gd.addChoice(
                     "Measure single cell:",
-                    ["Merge 1", "Merge2 ", "Next cell", "Next image"],
+                    ["Merge 1", "Merge2 ", "Next image"],
                     "Channel 1"
         )
         gd.showDialog()
@@ -218,11 +222,7 @@ def img_analysis(imp, output_dir):
         if measurement_type == "Next image":
             IJ.log("Moving to the next image.")
             break
-        
-        elif measurement_type == "Next cell":
-            IJ.log("Moving to the next cell.")
-            continue
-        
+                
         n_cell += 1
         
         count = 0
