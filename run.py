@@ -15,6 +15,37 @@ import traceback
 # ---------------------------------
 # HELPERS
 # ---------------------------------
+def ask_params_for_image():
+    gd = GenericDialog("Maximum Intensity Projection Parameters")
+    gd.addMessage("Choose the slice range.")
+    
+    # Fields
+    gd.addNumericField("First slice:", 1, 0)
+    gd.addNumericField("Last slice:", 10, 0)
+    
+    # Show dialog
+    gd.showDialog()
+    
+    # User pressed Cancel
+    if gd.wasCanceled():
+        return None
+    
+    # Read values in the same order they were added
+    first_slice = int(gd.getNextNumber())
+    last_slice = int(gd.getNextNumber())
+    
+    # Validate input
+    if first_slice < 1:
+        print("First slice must be >= 1.")
+        return None
+
+    if last_slice < first_slice:
+        print("Last slice must be >= first slice.")
+        return None
+
+    return first_slice, last_slice
+    
+    
 def clear_results_and_rois():
     IJ.run("Clear Results")
     
@@ -34,9 +65,11 @@ def img_analysis(imp):
     c1 = channels[0] # DAPI channel
     c2 = channels[1] # MEARGUREMENT 1
     c3 = channels[2] # MEARGUREMENT 2
-
-        
-        
+    
+    # --- Changes names of splitted images ---
+    c1.setTitle("DAPI_{}".format(imp_name))
+    c2.setTitle("MEAS1_{}".format(imp_name))
+    c3.setTitle("MEAS2_{}".format(imp_name))
 
 # ---------------------------------
 # MAIN FUNCTION
