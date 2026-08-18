@@ -15,6 +15,9 @@ import traceback
 def image_name(imp):
     return imp.getTitle().split(".")[0]
 
+def safe_name(text):
+    return text.replace(" ", "_").lower()
+
 def ask_params_for_image(n_slices):
     gd = NonBlockingGenericDialog("Maximum Intensity Projection Parameters")
     gd.addMessage(
@@ -88,9 +91,6 @@ def max_projection(imp, first_slice, last_slice):
     
 def clear_results_and_rois():
     IJ.run("Clear Results")
-
-def safe_name(text):
-    return text.replace(" ", "_").lower()
     
 def close_image(imp):
     if imp is not None:
@@ -113,7 +113,7 @@ def close_all_images():
             imp.close()
            
 def img_analysis(imp, output_dir):   
-    imp_name = image_name(imp)
+    imp_name = safe_name(image_name(imp))
     n_slices = imp.getNSlices()
     
     # Split channels
@@ -162,12 +162,10 @@ def img_analysis(imp, output_dir):
     merge2.show()
     
     # Save merged images
-    merge1_name = "C1_{}.tif".format(imp_name)
-    merge1_path = os.path.join(output_dir, merge1_name)
+    merge1_path = os.path.join(output_dir, image_name(merge1))
     IJ.save(merge1, merge1_path)
     
-    merge2_name = "C2_{}.tif".format(imp_name)
-    merge2_path = os.path.join(output_dir, merge2_name)
+    merge2_path = os.path.join(output_dir, image_name(merge2))
     IJ.save(merge2, merge2_path)
     
     
@@ -195,8 +193,9 @@ def img_analysis(imp, output_dir):
     # Select multipoint tool
     IJ.setTool("multipoint")
     
-    # Create an empty results table
+    # Create an empty results table and show it
     rt = ResultsTable()
+    rt.show("Results")
     
     # --- Iteration ---        
     n_cell = 0
@@ -231,6 +230,9 @@ def img_analysis(imp, output_dir):
         #img = merge1 if measurement_type == "Channel 1" else merge2
         
         while count < 1:
+            # Clear ROI manager
+            rm.reset()
+             
             # Measure image 
             WaitForUserDialog(
                 "Cell %s - %s" % (n_cell, measurement_type),
