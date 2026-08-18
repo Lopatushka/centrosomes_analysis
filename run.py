@@ -120,12 +120,7 @@ def img_analysis(imp):
     c1 = channels[0] # DAPI channel
     c2 = channels[1] # MEARGUREMENT 1
     c3 = channels[2] # MEARGUREMENT 2
-    
-    # --- Changes names of splitted images ---
-    #c1.setTitle("DAPI_{}".format(imp_name))
-    #c2.setTitle("MEAS1_{}".format(imp_name))
-    #c3.setTitle("MEAS2_{}".format(imp_name))
-    
+       
     # Show splitted images
     c1.show()
     c2.show()
@@ -143,12 +138,7 @@ def img_analysis(imp):
     proj1 = max_projection(c1, first_slice, last_slice) # DAPI BLUE
     proj2 = max_projection(c2, first_slice, last_slice) # MEASUREMENT 1 GREEN
     proj3 = max_projection(c3, first_slice, last_slice) # MEASUREMENT 2 RED
-    
-    # Show images
-    #proj1.show()
-    #proj2.show()
-    #proj3.show()
-    
+       
     # Merge channels: RED GREEN BLUE
     merge1 = RGBStackMerge.mergeChannels([None, proj2, proj1, None, None, None, None], True)
     ImageConverter(merge1).convertToRGB()
@@ -172,6 +162,10 @@ def img_analysis(imp):
     close_image(proj1)
     close_image(proj2)
     close_image(proj3)
+    
+    # Adjust brigthtness and contrast
+    IJ.run(merge1, "Enhance Contrast", "saturated=0.35 normalize")
+    IJ.run(merge2, "Enhance Contrast", "saturated=0.35 normalize")
     
     return True
     
