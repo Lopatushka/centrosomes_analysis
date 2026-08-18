@@ -25,6 +25,7 @@ def ask_params_for_image(n_slices):
     # Fields
     gd.addNumericField("First slice:", 1, 0)
     gd.addNumericField("Last slice:", n_slices, 0)
+    gd.addCheckbox("Stop analysis", False) # bool
     
     # Show dialog
     gd.showDialog()
@@ -36,6 +37,7 @@ def ask_params_for_image(n_slices):
     # Read values in the same order they were added
     first_slice = int(gd.getNextNumber())
     last_slice = int(gd.getNextNumber())
+    stop_analysis = gd.getNextBoolean()
     
     # Keep values within valid range
     first_slice = max(1, first_slice)
@@ -47,7 +49,8 @@ def ask_params_for_image(n_slices):
 
     return {
         "first_slice": first_slice,
-        "last_slice": last_slice
+        "last_slice": last_slice,
+        "stop_analysis": stop_analysis
     }
     
     
@@ -84,6 +87,9 @@ def img_analysis(imp):
     
     # Ask user about the parameters: first and last slice for the maximum intensity projection
     params = ask_params_for_image(n_slices)
+    if params["stop_analysis"]:
+        IJ.log("Analysis stopped by user.")
+        return
     first_slice = params["first_slice"] if params is not None else 1
     last_slice = params["last_slice"] if params is not None else n_slices
 
