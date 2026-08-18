@@ -223,8 +223,8 @@ def img_analysis(imp):
         while count < 1:
             # Measure image 
             WaitForUserDialog(
-            "Cell number %d - Channel %d" % (n_cell, measurement_type),
-            "Mark every object in Cell %d, Channel %d\n"
+            "Cell number %d - Channel %s" % (n_cell, measurement_type),
+            "Mark every object in Cell \n"
             "using the Multi-point tool.\n\n"
             "Click OK when finished."
             % (n_cell, measurement_type)
