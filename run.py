@@ -162,6 +162,13 @@ def img_analysis(imp, output_dir):
     merge2.show()
     
     # Save merged images
+    merge1_name = "C1_{}.tif".format(imp_name)
+    merge1_path = os.path.join(output_dir, merge1_name)
+    IJ.save(merge1, merge1_path)
+    
+    merge2_name = "C2_{}.tif".format(imp_name)
+    merge2_path = os.path.join(output_dir, merge2_name)
+    IJ.save(merge2, merge2_path)
     
     
     # Close images
