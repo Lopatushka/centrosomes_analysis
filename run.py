@@ -16,10 +16,10 @@ import traceback
 # HELPERS
 # ---------------------------------
 def ask_params_for_image(n_slices):
-    gd = GenericDialog("Maximum Intensity Projection Parameters")
+    gd = NonBlockingGenericDialog("Maximum Intensity Projection Parameters")
     gd.addMessage(
         "Choose the slice range.\n"
-        "This image contains %d slices." % n_slices
+        "Available slices: 1-%d" % n_slices
     )
     
     # Fields
@@ -77,12 +77,16 @@ def img_analysis(imp):
     c2.setTitle("MEAS1_{}".format(imp_name))
     c3.setTitle("MEAS2_{}".format(imp_name))
     
+    # Show splitted images
+    c1.show()
+    c2.show()
+    c3.show()
+    
     # Ask user about the parameters: first and last slice for the maximum intensity projection
-    params = ask_params_for_image()
+    params = ask_params_for_image(n_slices)
     first_slice = params["first_slice"] if params is not None else 1
     last_slice = params["last_slice"] if params is not None else n_slices
-    if last_slice > n_slices:
-        last_slice = n_slices
+
 
 # ---------------------------------
 # MAIN FUNCTION
@@ -108,7 +112,7 @@ def main():
                     IJ.showMessage("Failed to open image:", filename)
                     continue
                 
-                imp.show()
+                #imp.show()
                 
                 IJ.log("Processing image pair {}: {}".format(n_files, root))
                 
