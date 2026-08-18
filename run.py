@@ -185,24 +185,23 @@ def img_analysis(imp):
     # Select multipoint tool
     IJ.setTool("multipoint")
     
+    # Create an empty results table
+    rt = ResultsTable()
+    
     # --- Iteration ---        
-    #single_cell = True
-    # Counters
     n_cell = 0
-    n_roi1_per_cell = 0
-    n_roi2_per_cell = 0
     
     while True:
         gd = GenericDialog("Measurement")
         gd.addChoice(
-                    "Measure:",
-                    ["Channel 1", "Channel 2", "Next image", "Stop analysis"],
+                    "Measure single cell:",
+                    ["Merge 1", "Merge2 ", "Next cell", "Next image"],
                     "Channel 1"
         )
         gd.showDialog()
         
         if gd.wasCanceled():
-            measurement_type = "Next"
+            measurement_type = "Next image"
         else:
             measurement_type = gd.getNextChoice()
             
@@ -211,25 +210,47 @@ def img_analysis(imp):
             IJ.log("Moving to the next image.")
             break
         
-        # Stop analysis
-        elif measurement_type == "Stop analysis":
-            IJ.log("Analysis stopped by user.")
-            close_all_images()
-            return
+        elif measurement_type == "Next cell":
+            IJ.log("Moving to the next cell.")
+            continue
         
         n_cell += 1
         
-        WaitForUserDialog(
-        "Cell number %d - Channel %d" % (n_cell, image_name(merge1)),
-        "Mark every object in Cell %d, Channel %d\n"
-        "using the Multi-point tool.\n\n"
-        "Click OK when finished."
-        % (n_cell, image_name(merge1))
-    ).show()
+        count = 0
+        
+        #img = merge1 if measurement_type == "Channel 1" else merge2
+        
+        while count < 1:
+            # Measure image 
+            WaitForUserDialog(
+            "Cell number %d - Channel %d" % (n_cell, measurement_type),
+            "Mark every object in Cell %d, Channel %d\n"
+            "using the Multi-point tool.\n\n"
+            "Click OK when finished."
+            % (n_cell, measurement_type)
+            ).show()
+            
+            # Re-fetch after user interaction in while loop
+            rois = rm.getRoisAsArray()
+            if len(rois) == 0:
+                IJ.log("ROI Manager is empty. Moving to the next cell.")
+                continue
+            
+            # Fill the table with results
+            for i, roi in enumerate(rois):
+                roi_name = roi.getName()
+                if roi_name is None or roi_name.strip() == "":
+                    roi_name = "ROI_%02d" % (i + 1) 
+                
+                rt.incrementCounter()
+                rt.addValue("Image", imp_name)
+                rt.addValue("Cell", n_cell)
+                rt.addValue("Channel", measurement_type)
+                rt.addValue("ROI", roi_name)
+            
+            count += 1
+        
 
-
-    
-       
     return True
     
 
