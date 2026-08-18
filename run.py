@@ -164,9 +164,14 @@ def img_analysis(imp):
     
     # Close images
     close_image(imp)
+    
     close_image(c1)
     close_image(c2)
     close_image(c3)
+    
+    close_image(proj1)
+    close_image(proj2)
+    close_image(proj3)
     
     return True
     
