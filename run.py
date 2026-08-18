@@ -246,7 +246,7 @@ def img_analysis(imp, output_dir):
             rois = rm.getRoisAsArray()
             if len(rois) == 0:
                 IJ.log("ROI Manager is empty. Moving to the next cell.")
-                continue
+                break
             
             # Fill the table with results
             for i, roi in enumerate(rois):
@@ -262,6 +262,10 @@ def img_analysis(imp, output_dir):
             
             # Show/update table
             rt.show("Results")
+            
+            # Remove multipoint selection
+            IJ.run(merge1, "Select None", "")
+            IJ.run(merge2, "Select None", "")
             
             count += 1
     
