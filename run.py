@@ -69,7 +69,7 @@ def img_analysis(imp):
     channels = ChannelSplitter.split(imp)
     if len(channels) != 3:
         IJ.log("Image {} does not have 3 channels!".format(imp_name))
-        return
+        return True
     
     c1 = channels[0] # DAPI channel
     c2 = channels[1] # MEARGUREMENT 1
@@ -89,9 +89,14 @@ def img_analysis(imp):
     params = ask_params_for_image(n_slices)
     if params["stop_analysis"]:
         IJ.log("Analysis stopped by user.")
-        return
+        return False
+    
     first_slice = params["first_slice"] if params is not None else 1
     last_slice = params["last_slice"] if params is not None else n_slices
+    
+    return True
+    
+
 
 
 # ---------------------------------
@@ -122,7 +127,10 @@ def main():
                 
                 IJ.log("Processing image pair {}: {}".format(n_files, root))
                 
-                img_analysis(imp)
+                continue_analysis = img_analysis(imp)
+                if not continue_analysis:
+                    IJ.log("Analysis stopped by user.")
+                    break
                 
                 # Cleanup
                 clear_results_and_rois()
