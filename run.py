@@ -1,11 +1,10 @@
 from ij import IJ, WindowManager
 from ij.plugin.frame import RoiManager
-from ij.gui import ShapeRoi
+from ij.gui import WaitForUserDialog, GenericDialog
 from ij.plugin import ChannelSplitter, ZProjector, RGBStackMerge
-from ij.measure import Measurements, ResultsTable
 from ij.process import ImageStatistics, ImageConverter
-from ij.gui import NonBlockingGenericDialog
-from ij.gui import WaitForUserDialog
+from ij.gui import NonBlockingGenericDialog, WaitForUserDialog, PointRoi
+from ij.measure import ResultsTable, Measurements
 import os
 import csv
 import traceback
@@ -13,6 +12,9 @@ import traceback
 # ---------------------------------
 # HELPERS
 # ---------------------------------
+def image_name(imp):
+    return imp.getTitle().split(".")[0]
+
 def ask_params_for_image(n_slices):
     gd = NonBlockingGenericDialog("Maximum Intensity Projection Parameters")
     gd.addMessage(
@@ -86,6 +88,9 @@ def max_projection(imp, first_slice, last_slice):
     
 def clear_results_and_rois():
     IJ.run("Clear Results")
+
+def safe_name(text):
+    return text.replace(" ", "_").lower()
     
 def close_image(imp):
     if imp is not None:
@@ -108,7 +113,7 @@ def close_all_images():
             imp.close()
            
 def img_analysis(imp):   
-    imp_name = imp.getTitle().split(".")[0] # get image name without extension
+    imp_name = image_name(imp)
     n_slices = imp.getNSlices()
     
     # Split channels
@@ -166,6 +171,64 @@ def img_analysis(imp):
     close_image(proj1)
     close_image(proj2)
     close_image(proj3)
+    
+    # ---------------------------------
+    # Measurements
+    # ---------------------------------   
+    clear_results_and_rois()
+    
+    # Open ROI Manager if not already open
+    rm = RoiManager.getInstance()
+    if rm is None:
+        rm = RoiManager()
+        
+    # Select multipoint tool
+    IJ.setTool("multipoint")
+    
+    # --- Iteration ---        
+    #single_cell = True
+    # Counters
+    n_cell = 0
+    n_roi1_per_cell = 0
+    n_roi2_per_cell = 0
+    
+    while True:
+        gd = GenericDialog("Measurement")
+        gd.addChoice(
+                    "Measure:",
+                    ["Channel 1", "Channel 2", "Next image", "Stop analysis"],
+                    "Channel 1"
+        )
+        gd.showDialog()
+        
+        if gd.wasCanceled():
+            measurement_type = "Next"
+        else:
+            measurement_type = gd.getNextChoice()
+            
+        # Skip pair and go to next folder
+        if measurement_type == "Next image":
+            IJ.log("Moving to the next image.")
+            break
+        
+        # Stop analysis
+        elif measurement_type == "Stop analysis":
+            IJ.log("Analysis stopped by user.")
+            close_all_images()
+            return
+        
+        n_cell += 1
+        
+        WaitForUserDialog(
+        "Cell number %d - Channel %d" % (n_cell, image_name(merge1)),
+        "Mark every object in Cell %d, Channel %d\n"
+        "using the Multi-point tool.\n\n"
+        "Click OK when finished."
+        % (n_cell, image_name(merge1))
+    ).show()
+
+
+    
        
     return True
     
