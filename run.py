@@ -139,6 +139,8 @@ def img_analysis(imp, output_dir):
     first_slice = params["first_slice"] if params is not None else 1
     last_slice = params["last_slice"] if params is not None else n_slices
     
+    IJ.log("Keep slices {} - {}".format(first_slice, last_slice))
+    
     # Make maximum intensity projection
     proj1 = max_projection(c1, first_slice, last_slice) # DAPI BLUE
     proj2 = max_projection(c2, first_slice, last_slice) # MEASUREMENT 1 GREEN
@@ -204,6 +206,9 @@ def img_analysis(imp, output_dir):
         # Clear ROI manager
         rm.reset()
         
+        if n_cell > 0:
+            IJ.log("Moving to the next cell in the image.")
+        
         # Dialog with user
         gd = GenericDialog("Measurement")
         gd.addChoice(
@@ -259,8 +264,11 @@ def img_analysis(imp, output_dir):
                 rt.addValue("ROI", roi_name)
             
             count += 1
-        
-
+    
+    # Close images after analysis   
+    close_image(merge1)
+    close_image(merge2)
+    
     return True
     
 
@@ -307,7 +315,7 @@ def main():
                 clear_results_and_rois()
                 close_image(imp)
     
-    #close_all_images()
+    close_all_images()
     IJ.log("Finished processing {} files.".format(n_files))
 
 
