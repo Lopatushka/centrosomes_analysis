@@ -112,7 +112,7 @@ def close_all_images():
             imp.changes = False  # prevent "Save changes?" dialog
             imp.close()
            
-def img_analysis(imp):   
+def img_analysis(imp, output_dir):   
     imp_name = image_name(imp)
     n_slices = imp.getNSlices()
     
@@ -160,6 +160,9 @@ def img_analysis(imp):
     # Show splitted images
     merge1.show()
     merge2.show()
+    
+    # Save merged images
+    
     
     # Close images
     close_image(imp)
@@ -261,6 +264,12 @@ def main():
     if input_dir is None:
         return
     
+    # Ask user where to save results
+    output_dir = IJ.getDirectory("Choose a directory to save data")
+    if output_dir is None:
+        output_dir = input_dir
+    IJ.log("Results will be saved in the directory: {}".format(output_dir))
+    
     # --- Iteration ---
     n_files = 0
     for root, dirs, files in os.walk(input_dir):
@@ -280,7 +289,7 @@ def main():
                 
                 IJ.log("Processing image pair {}: {}".format(n_files, root))
                 
-                continue_analysis = img_analysis(imp)
+                continue_analysis = img_analysis(imp, output_dir)
                 if not continue_analysis:
                     IJ.log("Analysis stopped by user.")
                     break
