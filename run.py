@@ -301,6 +301,11 @@ def img_analysis(imp, output_dir):
             IJ.run(merge1, "Select None", "")
             IJ.run(merge2, "Select None", "")
             
+            # Save ROI Manager as a ZIP file
+            save_path_rm = os.path.join(output_dir, imp_name + "_" + n_cell + "_" + channel + ".zip")
+            rm.save(save_path_rm)
+            IJ.log("Saved ROIs for cell # {}, channel # {}.".format(n_cell, channel))
+            
         n_cell += 1
     
     # Save results table as csv file
