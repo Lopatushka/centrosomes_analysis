@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 from scipy.stats import mannwhitneyu
 
@@ -33,3 +34,84 @@ def load_data(dir):
 
 def data_subset(df, channel):
     return df[df['Channel number']==channel]
+
+def barplot_normal(df,
+                  output_dir = ".",
+                  threshold = 3,
+                  parameter = "centrosomes",
+                  figsize=(5, 4.5),
+                  bar_colors = ["#4C72B0", "#DD8452"],
+                  ):
+    
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # X positions for samples
+    x = np.arange(len(df))
+    
+    # Bars
+    ax.bar(
+        x,
+        df["Percentage"],
+        yerr=df["SD"],
+        capsize=5,
+        width=0.65,
+        color=bar_colors,
+        edgecolor="black",
+        linewidth=1.2,
+        error_kw={
+            "elinewidth": 1.3,
+            "capthick": 1.3
+        }
+    )
+    
+    # Sample names
+    ax.set_xticks(x)
+    ax.set_xticklabels(df["Sample_name"])
+
+    # Y label
+    ax.set_ylabel(
+        "%% Cells with %s or more %s" % (threshold, parameter),
+        fontsize=13
+    )
+    
+    # Percentage axis
+    y_min = (df["Percentage"] - df["SD"]).min()
+    y_max = (df["Percentage"] + df["SD"]).max()
+    
+    padding = (y_max - y_min) * 0.1
+    
+    # Add space and round up to nearest 10
+    y_lower = np.floor((y_min - padding) / 10) * 10
+    y_upper = np.ceil((y_max + padding) / 10) * 10
+    
+    y_lower = max(0, y_lower)
+
+    ax.set_ylim(y_lower, y_upper)
+    ax.set_yticks(np.arange(y_lower, y_upper + 1, 20))
+
+    # Tick appearance
+    ax.tick_params(
+        axis="both",
+        labelsize=11,
+        width=1.2,
+        length=5
+    )
+    
+    # Clean frame
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_linewidth(1.2)
+    ax.spines["bottom"].set_linewidth(1.2)
+
+    plt.tight_layout()
+    
+    plt.tight_layout()
+
+    # Save figure
+    plt.savefig(
+        "centrosomes_percentage.png",
+        dpi=600,
+        bbox_inches="tight"
+    )
+
+    plt.show()
