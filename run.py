@@ -8,6 +8,8 @@ from ij.measure import ResultsTable, Measurements
 import os
 import csv
 import traceback
+from java.lang import Thread
+from java.awt import Toolkit
 
 # ---------------------------------
 # HELPERS
@@ -92,6 +94,44 @@ def max_projection(imp, first_slice, last_slice):
 def clear_results_and_rois():
     IJ.run("Clear Results")
     
+def show_side_by_side(imp1, imp2):
+
+    # Show images
+    imp1.show()
+    imp2.show()
+
+    # Give Fiji time to create the windows
+    Thread.sleep(200)
+
+    win1 = imp1.getWindow()
+    win2 = imp2.getWindow()
+
+    #if win1 is None or win2 is None:
+        #IJ.log("Could not get image windows.")
+        #return
+
+    # Set window sizes
+    width = 600
+    height = 600
+
+    win1.setSize(width, height)
+    win2.setSize(width, height)
+
+    # Position first image
+    x1 = 20
+    y1 = 50
+
+    win1.setLocation(x1, y1)
+
+    # Position second image next to it
+    x2 = x1 + width + 10
+
+    win2.setLocation(x2, y1)
+
+    # Bring windows to front
+    win1.toFront()
+    win2.toFront()
+    
 def close_image(imp):
     if imp is not None:
         imp.close()
@@ -160,9 +200,11 @@ def img_analysis(imp, output_dir):
     merge2.setTitle("merge2_{}".format(imp_name))
     
     # Show splitted images
-    merge1.show()
-    merge2.show()
+    #merge1.show()
+    #merge2.show()
     
+    show_side_by_side(merge1, merge2)
+        
     # Save merged images
     merge1_path = os.path.join(output_dir, image_name(merge1))
     IJ.save(merge1, merge1_path)
