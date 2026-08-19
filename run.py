@@ -354,9 +354,9 @@ def main():
                     IJ.showMessage("Failed to open image:", filename)
                     continue
                 
-                imp_name = safe_name(image_name(imp))
+                #imp_name = safe_name(image_name(imp))
                 
-                IJ.log("Processing image # {}: {}".format(n_files, imp_name))
+                IJ.log("Processing image # {}: {}".format(n_files, path))
                 
                 continue_analysis = img_analysis(imp, output_dir)
                 if not continue_analysis:
