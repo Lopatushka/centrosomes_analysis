@@ -3,7 +3,7 @@ import numpy as np
 import os
 from scipy.stats import mannwhitneyu
 
-def load_data(dir, pixel_size=1):
+def load_data(dir):
     dfs = []
     all_dirs = []
 
