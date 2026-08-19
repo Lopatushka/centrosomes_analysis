@@ -35,6 +35,35 @@ def load_data(dir):
 def data_subset(df, channel):
     return df[df['Channel number']==channel]
 
+def processing(df, threshold = 3):
+    # Empty list
+    results_dicts = []
+
+    # Iteration through different samples
+    for sample in df['Sample'].unique():
+        sb = df[df['Sample'] == sample]
+        
+        # Calculate the persentage of cells with # objects >= threshold
+        n_total = len(sb)
+        above_thresh = sum(sb['Objects_number'] >= threshold)
+        percentage = 100 * above_thresh/n_total
+        sd = np.sqrt(percentage * (100  - percentage)) # SD Bernoulli? 
+        
+        temp = {
+                'Sample_name': sample,
+                'Above_threshold': above_thresh,
+                'N_total_cells': n_total,
+                'Percentage': percentage,
+                'SD': sd,
+            }
+        
+        results_dicts.append(temp)
+
+
+    results = pd.DataFrame(results_dicts)
+    
+    return results
+
 def barplot_normal(df,
                   output_dir = ".",
                   threshold = 3,
@@ -108,8 +137,9 @@ def barplot_normal(df,
     plt.tight_layout()
 
     # Save figure
+    graph_name = output_dir + "/" + parameter + ".png"
     plt.savefig(
-        "centrosomes_percentage.png",
+        graph_name,
         dpi=600,
         bbox_inches="tight"
     )
