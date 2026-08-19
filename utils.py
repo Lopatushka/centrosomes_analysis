@@ -30,3 +30,6 @@ def load_data(dir):
     data = pd.concat(dfs, ignore_index=True)
 
     return data
+
+def data_subset(df, channel):
+    return df[df['Channel number']==channel]
